@@ -3,6 +3,7 @@ from transformers import BertConfig, TFBertModel
 
 
 class Bert_TextCNN(tf.keras.Model):
+    # textcnn
     def __init__(self, bert_path, configs, num_classes):
         super(Bert_TextCNN, self).__init__()
         self.num_filters = configs.num_filters
@@ -27,6 +28,7 @@ class Bert_TextCNN(tf.keras.Model):
                                             padding='same', activation='relu')
         self.pool3 = tf.keras.layers.GlobalMaxPool1D()
         self.dropout = tf.keras.layers.Dropout(self.dropout_rate, name='dropout')
+        # 全连接层
         self.dense1 = tf.keras.layers.Dense(512, activation='relu',
                                            kernel_regularizer=tf.keras.regularizers.l2(0.2),
                                            bias_regularizer=tf.keras.regularizers.l2(0.2), name='dense1')
