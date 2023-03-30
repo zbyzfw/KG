@@ -1,6 +1,6 @@
 import tensorflow as tf
-from transformers import BertConfig, TFBertModel
-
+from transformers import BertConfig, TFBertModel, BertModel
+# from transformers import AutoModelForSequenceClassification, AutoTokenizer, TrainingArguments, Trainer
 
 class Bert_TextCNN(tf.keras.Model):
     # textcnn
@@ -12,7 +12,7 @@ class Bert_TextCNN(tf.keras.Model):
         self.sequence_length = configs.max_sequence_length
         self.dropout_rate = configs.dropout_rate
         self.config = BertConfig.from_pretrained(bert_path)
-        self.bert_layers = TFBertModel.from_pretrained(bert_path, num_labels=self.num_classes)
+        self.bert_layers = TFBertModel.from_pretrained(bert_path,num_labels=self.num_classes)
         self.bert_layers.trainable = True
         self.softmax = tf.keras.layers.Softmax()
         self.conv1 = tf.keras.layers.Conv1D(filters=self.num_filters, kernel_size=3,
@@ -36,12 +36,14 @@ class Bert_TextCNN(tf.keras.Model):
                                            kernel_regularizer=tf.keras.regularizers.l2(0.2),
                                            bias_regularizer=tf.keras.regularizers.l2(0.2), name='dense2')
 
+    # 被此装饰器修饰的是静态图
     @tf.function(input_signature=[tf.TensorSpec(shape=[None, 512], dtype=tf.int32, name='input_ids'),
                                   tf.TensorSpec(shape=[None, 512], dtype=tf.int32, name='input_mask'),
                                   tf.TensorSpec(shape=[None, 512], dtype=tf.int32, name='token_ids'),
                                   tf.TensorSpec(shape=[], dtype=tf.bool, name='training')])
     def call(self, input_ids, input_mask, token_ids, training=True):
-        embedding_outputs = self.bert_layers(inputs=input_ids, attention_mask=input_mask, token_type_ids=token_ids)
+        # embedding_outputs = self.bert_layers(inputs=input_ids, attention_mask=input_mask, token_type_ids=token_ids)
+        embedding_outputs = self.bert_layers(input_ids, input_mask, token_ids)
         # TextCNN_feature
         inputs = embedding_outputs[0]
         # print("inputs:", inputs)

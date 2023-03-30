@@ -9,7 +9,7 @@ from pathlib import Path
 from configure import Configure
 from utils.logger import get_logger
 base_path = Path(__file__).resolve().parent.parent
-os.environ["CUDA_VISIBLE_DEVICES"] = '2'
+os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 
 class Predictor:
@@ -21,7 +21,7 @@ class Predictor:
         self.label2id, self.id2label = data_manager.load_labels()
         self.label_list = list(self.label2id.keys())
         self.logger.info('loading model parameter')
-        self.Bert_TextCNN_Model = Bert_TextCNN(bert_path=os.path.join(base_path, 'engines/bert-base-chinese'), configs=configs, num_classes=num_classes)
+        self.Bert_TextCNN_Model = Bert_TextCNN(bert_path=os.path.join(base_path, 'bert-base-chinese'), configs=configs, num_classes=num_classes)
         # print(configs.pb_model_sava_dir)
         # self.Bert_TextCNN_Model = tf.keras.models.load_model("/media/being/_dev_dva/KG/NLU/intent_recognition/Bert/engines/saved_model")
         checkpoints = tf.train.Checkpoint(model=self.Bert_TextCNN_Model)
@@ -51,23 +51,23 @@ configs = Configure(config_file=os.path.join(base_path, args.config_file))
 logger = get_logger(configs.log_dir)
 dataManager = BertDataManager(configs, logger)
 predictor = Predictor(configs=configs, data_manager=dataManager, logger=logger)
-# print(predictor.predict_one("岩骨斜坡脑膜瘤可以怎么预防"))
+print(predictor.predict_one("岩骨斜坡脑膜瘤可以怎么预防"))
 
 if __name__ == "__main__":
     app = flask.Flask(__name__)
 
-    @app.route("/service/api/bert_intent_recognize", methods=["GET", "POST"])
-    def bert_intent_recognize():
-        data = {"success": 0}
-        param = flask.request.get_json()
-        print(param)
-        text = param["text"]
-        result = predictor.predict_one(text)
-        data["data"] = result
-        data["success"] = 1
-        print("data", data)
-        return flask.jsonify(data)
-
-    server = pywsgi.WSGIServer(("0.0.0.0", 60062), app)
-    server.serve_forever()
+    # @app.route("/service/api/bert_intent_recognize", methods=["GET", "POST"])
+    # def bert_intent_recognize():
+    #     data = {"success": 0}
+    #     param = flask.request.get_json()
+    #     print(param)
+    #     text = param["text"]
+    #     result = predictor.predict_one(text)
+    #     data["data"] = result
+    #     data["success"] = 1
+    #     print("data", data)
+    #     return flask.jsonify(data)
+    #
+    # server = pywsgi.WSGIServer(("0.0.0.0", 60062), app)
+    # server.serve_forever()
 

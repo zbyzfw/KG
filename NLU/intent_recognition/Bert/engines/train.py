@@ -11,7 +11,8 @@ from transformers import BertTokenizer
 warnings.filterwarnings("ignore")
 pretrain_model_name = "bert-base-chinese"
 MODEL_PATH = "./bert-base-chinese"
-strategy = tf.distribute.MirroredStrategy(devices=["GPU:0", "GPU:1", "GPU:2"])
+# strategy = tf.distribute.MirroredStrategy(devices=["GPU:0", "GPU:1", "GPU:2"])
+strategy = tf.distribute.MirroredStrategy(devices=["GPU:0"])
 tokenizer = BertTokenizer.from_pretrained(pretrain_model_name)
 
 def train(configs, dataManager, logger):
@@ -65,7 +66,7 @@ def train(configs, dataManager, logger):
         with tf.GradientTape() as tape:
 
             X_train_batch, y_train_batch, att_mask_train_batch, token_type_ids_train_batch = inputs
-            # print(X_train_batch, y_train_batch, att_mask_train_batch, token_type_ids_train_batch)
+            # print(X_train_batch,'-', y_train_batch,'-', att_mask_train_batch, token_type_ids_train_batch)
             outputs = model.call(input_ids=X_train_batch, input_mask=att_mask_train_batch, token_ids=token_type_ids_train_batch, training=True)
             y_true = tf.one_hot(y_train_batch, depth=num_classes)
 
@@ -110,15 +111,20 @@ def train(configs, dataManager, logger):
 
         for X in iter(train_dist_dataset):
             X_train_batch, y_train_batch, att_mask_train_batch, token_type_ids_train_batch = X
-            y_train_batch = y_train_batch.values[0].numpy()
-            X_train_batch = X_train_batch.values[0].numpy()[0]
+            # y_train_batch = y_train_batch.values[0].numpy()
+            # X_train_batch = X_train_batch.values[0].numpy()[0]
+            y_train_batch = y_train_batch.numpy()
+            X_train_batch = X_train_batch.numpy()[0]
             sentence = tokenizer.decode(X_train_batch)
             y_true = tf.one_hot(y_train_batch, depth=num_classes)
-            # print(X_train_batch, y_train_batch)
+            # print(X_train_batch, y_train_batch,)
             _, outputs = distributed_train_step(X)
-            rst = {label: prob for label, prob in zip(label_list, outputs.values[0].numpy()[0])}
+            # print(X)
+            # _, outputs = train_step(X)
+            # rst = {label: prob for label, prob in zip(label_list, outputs.values[0].numpy()[0])}
+            rst = {label: prob for label, prob in zip(label_list, outputs.numpy()[0])}
             rst = sorted(rst.items(), key=lambda kv: kv[1], reverse=True)
-            print(rst[0], label_list[np.argmax(y_true[0])], sentence)
+            # print(rst[0], label_list[np.argmax(y_true[0])], sentence)  # 推理标签,真实标签,句子
             num_train_batches += 1
 
             if num_train_batches % configs.print_per_batch == 0 and num_train_batches != 0:
@@ -129,7 +135,8 @@ def train(configs, dataManager, logger):
         logger.info('start evaluate engines...')
 
         for X_val in iter(valid_dist_dataset):
-            _ = distributed_test_step(X_val)
+            # _ = distributed_test_step(X_val)
+            _ = test_step(X_val)
             num_val_batches += 1
 
             if num_val_batches % configs.print_per_batch == 0 and num_val_batches != 0:
