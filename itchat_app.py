@@ -17,11 +17,13 @@ def text_replay(msg):
     if user_intent in ["greet","goodbye","deny","isbot"]:
         reply = gossip_robot(user_intent)
     elif user_intent == "accept":
+        # 通过判断是否有json文件来确定是否有需要确定的回复
         reply = load_user_dialogue_context(msg.User['NickName'])
         reply = reply.get("choice_answer")
     else:
         reply = medical_robot(msg['Text'],msg.User['NickName'])
         if reply["slot_values"]:
+            # 创建json文件存储中间结果
             dump_user_dialogue_context(msg.User['NickName'],reply)
         reply = reply.get("replay_answer")
 
