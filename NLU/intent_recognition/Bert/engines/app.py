@@ -51,7 +51,7 @@ configs = Configure(config_file=os.path.join(base_path, args.config_file))
 logger = get_logger(configs.log_dir)
 dataManager = BertDataManager(configs, logger)
 predictor = Predictor(configs=configs, data_manager=dataManager, logger=logger)
-print(predictor.predict_one("岩骨斜坡脑膜瘤可以怎么预防"))
+print(predictor.predict_one("岩骨斜坡脑膜瘤可以怎么办"))
 
 if __name__ == "__main__":
     app = flask.Flask(__name__)

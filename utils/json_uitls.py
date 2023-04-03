@@ -19,3 +19,4 @@ def load_user_dialogue_context(user):
         with open(path, 'r', encoding='utf8') as f:
             data = f.read()
             return json.loads(data)
+

@@ -37,9 +37,9 @@ class Bert_TextCNN(tf.keras.Model):
                                            bias_regularizer=tf.keras.regularizers.l2(0.2), name='dense2')
 
     # 被此装饰器修饰的是静态图
-    @tf.function(input_signature=[tf.TensorSpec(shape=[None, 512], dtype=tf.int32, name='input_ids'),
-                                  tf.TensorSpec(shape=[None, 512], dtype=tf.int32, name='input_mask'),
-                                  tf.TensorSpec(shape=[None, 512], dtype=tf.int32, name='token_ids'),
+    @tf.function(input_signature=[tf.TensorSpec(shape=[None, 256], dtype=tf.int32, name='input_ids'),
+                                  tf.TensorSpec(shape=[None, 256], dtype=tf.int32, name='input_mask'),
+                                  tf.TensorSpec(shape=[None, 256], dtype=tf.int32, name='token_ids'),
                                   tf.TensorSpec(shape=[], dtype=tf.bool, name='training')])
     def call(self, input_ids, input_mask, token_ids, training=True):
         # embedding_outputs = self.bert_layers(inputs=input_ids, attention_mask=input_mask, token_type_ids=token_ids)

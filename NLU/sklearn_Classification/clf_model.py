@@ -25,6 +25,7 @@ class CLF_Model(object):
 if __name__ == "__main__":
     model = CLF_Model(os.path.join(base_path, "model_file"))
 
-    text = "你是谁"
+    text = "你是aa"
     label = model.predict(text)
     print(label)
+

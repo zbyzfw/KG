@@ -100,13 +100,14 @@ def semantic_parser(text, user):
     对文本进行解析
     intent = {"name":str,"confidence":float}
     """
-    intent_rst = intent_classifier(text)
+    intent_rst = intent_classifier(text)  # 使用bertTextcnn进行意图识别
     print("intent_rst:", intent_rst)
-    slot_rst = slot_recognizer(text)
+    slot_rst = slot_recognizer(text)  # bertbilstm进行命名实体识别
     print("slot_rst:", slot_rst)
     if intent_rst == -1 or slot_rst == -1 or intent_rst.get("name") == "其他":
         return semantic_slot.get("unrecognized")
 
+    # 获取槽位信息
     slot_info = semantic_slot.get(intent_rst.get("name"))
     print("slot_info", slot_info)
 
@@ -114,23 +115,25 @@ def semantic_parser(text, user):
     slots = slot_info.get("slot_list")
     slot_values = {}
     for slot in slots:
-        slot_values[slot] = None
+        slot_values[slot] = None  # {'Disease': None}
         for ent_info in slot_rst:
             for e in ent_info["entities"]:
-                if slot.lower() == e['type']:
-                    slot_values[slot] = entity_link(e['word'], e['type'])
+                if slot.lower() == e['type']:  # e.type是否是Disease
+                    slot_values[slot] = entity_link(e['word'], e['type'])  # 给Disease赋值
     print("slot_values:", slot_values)
     last_slot_values = load_user_dialogue_context(user)["slot_values"]
     for k in slot_values.keys():
+        # 如果没有匹配到Disease,则将其赋值为该用户的slot_values
         if slot_values[k] is None:
             slot_values[k] = last_slot_values.get(k, None)
-
+    # semantic_slot中的slot_values赋值
     slot_info["slot_values"] = slot_values
 
-    # 根据意图强度来确认回复策略
+    # 根据意图强度(置信度)来确认回复策略
     conf = float(intent_rst.get("confidence"))
     if conf >= intent_threshold_config["accept"]:
         slot_info["intent_strategy"] = "accept"
+    # 置信度低的时候要向用户确认
     elif conf >= intent_threshold_config["deny"]:
         slot_info["intent_strategy"] = "clarify"
     else:
@@ -189,6 +192,11 @@ def get_answer(slot_info):
 
 
 def gossip_robot(intent):
+    """
+    闲聊
+    :param intent: 闲聊的类型
+    :return: 随机选择的回复
+    """
     return random.choice(
         gossip_corpus.get(intent)
     )

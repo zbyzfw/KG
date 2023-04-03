@@ -53,13 +53,14 @@ def train(configs, dataManager, logger):
         else:
             optimizer = tf.keras.optimizers.Adam(learning_rate)
 
-        train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
-        test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
-        test_loss = tf.keras.metrics.Mean(name='test_loss')
-        train_loss = tf.keras.metrics.Mean(name='train_loss')
-        checkpoints = tf.train.Checkpoint(model=model)
-        checkpoints_manager = tf.train.CheckpointManager(checkpoint=checkpoints, directory=checkpoint_dir,
-                                                         max_to_keep=max_to_keep, checkpoint_name=checkpoint_name)
+    # Out of scope, this works.
+    train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
+    test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
+    test_loss = tf.keras.metrics.Mean(name='test_loss')
+    train_loss = tf.keras.metrics.Mean(name='train_loss')
+    checkpoints = tf.train.Checkpoint(model=model)
+    checkpoints_manager = tf.train.CheckpointManager(checkpoint=checkpoints, directory=checkpoint_dir,
+                                                     max_to_keep=max_to_keep, checkpoint_name=checkpoint_name)
 
     @tf.function
     def train_step(inputs):
